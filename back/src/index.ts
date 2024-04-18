@@ -17,13 +17,30 @@ const io = new Server(httpServer, {
 
 let lastSocketId: string = '';
 
+const random = Math.floor(Math.random()*100+1);
+console.log("random", random);
+
+let cpt = 0;
+
 io.on('connection', (socket) => {
   console.log('a user connected');
   lastSocketId = socket.id;
+  cpt++;
+  if(cpt===3) {
+    io.emit('reponse_utilisateurs', true);
+  }
 
-  socket.on('chat message', (msg) => {
+  socket.on('number message', (msg) => {
     console.log('every body message: ' + msg);
-    io.emit('chat message', msg);
+    if(msg>random) {
+    socket.emit('reponse', 'Trop haut');
+    }
+    else if(msg<random) {
+      socket.emit('reponse', 'Trop bas')
+    }
+    else {
+      io.emit('reponse', 'Bravo')
+    }
   });
 
   socket.on('send-others-a-message', (msg) => {

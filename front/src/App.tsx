@@ -3,95 +3,58 @@ import './App.css'
 import { socket } from './modules/socket'
 
 function App() {
-  const [messageList, updateMessageList] = useState<string[]>([])
-  const [newMessage, updateNewMessage] = useState<string>('')
-
+  const [numbercomparison, updateNumbercomparison] = useState<string>('')
+  const [mynumber, updateMynumber] = useState<number>(0)
+  const [isthreeusers, updateIsthreeusers] = useState<boolean>(false)
   useEffect(() => {
-    socket.off('boom')
-    socket.off('chouchou')
-    socket.off('chat message')
-    socket.on('chat message', (msg: string) => {
-      console.log('new message received', msg)
-      updateMessageList([...messageList, msg])
+    socket.off('reponse')
+    socket.off('reponse_utilisateurs')
+    // socket.on('number message', (msg: string) => {
+    //   console.log('new message received', msg)
+    //   updateNumbercomparison(msg);
+    // })
+    socket.on('reponse_utilisateurs', (reponseBoolean: boolean) => {
+      updateIsthreeusers(reponseBoolean);
     })
-    socket.on('chouchou', () => {
-      console.log('new message received')
-      updateMessageList([...messageList, 'chouchou'])
+    socket.on('reponse', (reponseString: string) => {
+      updateNumbercomparison(reponseString);
     })
-    socket.on('boom', () => {
-      console.log('new message received')
-      updateMessageList([...messageList, 'boom'])
-    })
+
 
     return () => {
-      socket.off('boom')
-      socket.off('chouchou')
-      socket.off('chat message')
+      socket.off('reponse')
+      socket.off('reponse_utilisateurs')
     }
   })
 
   return (
     <div>
-      <ul>
-        {messageList.map((message, index) => (
-          <li key={index}>{message}</li>
-        ))}
-      </ul>
-      <form action="">
-        <input 
-          type="text"
-          id="message" 
-          onChange={(e) => updateNewMessage(e.target.value)}
-          value={newMessage} 
-        />
-        <button
-          onClick={(e) => {
-            e.preventDefault()
-            socket.emit('chat message', newMessage)
-            updateNewMessage('')
-          }}
-        >
-          Send
-        </button>
-        <button
-          onClick={(e) => {
-            e.preventDefault()
-            socket.emit('send-others-a-message', newMessage)
-            updateNewMessage('')
-          }}
-        >
-          Send to others
-        </button>
-        
-        <button
-          onClick={(e) => {
-            e.preventDefault()
-            socket.emit('send-to-last-socket', newMessage)
-            updateNewMessage('')
-          }}
-        >
-          Send to last socket
-        </button>
-        <button
-          onClick={(e) => {
-            e.preventDefault()
-            socket.emit('patate')
-            updateNewMessage('')
-          }}
-        >
-          Patate
-        </button>
-        <button
-          onClick={(e) => {
-            e.preventDefault()
-            socket.emit('bim')
-            updateNewMessage('')
-          }}
-        >
-          Bim
-        </button>
-      </form>
-
+      {isthreeusers ?
+      <div>
+        <div>{numbercomparison}</div>
+        {numbercomparison!=='Bravo'?
+          <form action="">
+            <input 
+              type="number"
+              id="message" 
+              onChange={(e) => updateMynumber(parseInt(e.target.value))}
+              value={mynumber} 
+            />
+            <button
+              onClick={(e) => {
+                e.preventDefault()
+                socket.emit('number message', mynumber)
+                updateMynumber(0)
+              }}
+            >
+              Send
+            </button>
+          </form>:
+        <div>Un joueur a gagné</div>
+        }
+      </div> :
+        <div>La partie commencera dès qu'il y aura trois utilisateurs</div>
+      }
     </div>
   )
 }
